@@ -1,0 +1,1268 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Real-Time Marketing Decision Engine | Campaign Control Room</title>
+  <meta name="description" content="A black-and-white campaign control-room story explaining how near-real-time marketing signals are assembled, governed, and routed into role-based decisions.">
+  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg: #050505;
+      --bg-soft: #0d0d0d;
+      --panel: #111111;
+      --panel-2: #171717;
+      --panel-3: #1f1f1f;
+      --line: #2c2c2c;
+      --line-strong: #4d4d4d;
+      --text: #f5f5f5;
+      --text-soft: #cfcfcf;
+      --text-dim: #9a9a9a;
+      --chip: #e8e8e8;
+      --chip-text: #0a0a0a;
+      --shadow: 0 24px 60px rgba(0, 0, 0, 0.45);
+      --radius: 22px;
+      --radius-sm: 14px;
+      --max: 1500px;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    html {
+      scroll-behavior: smooth;
+    }
+
+    body {
+      margin: 0;
+      font-family: "Space Grotesk", sans-serif;
+      background:
+        radial-gradient(circle at top left, #161616 0, #050505 34rem),
+        linear-gradient(180deg, #050505 0%, #090909 100%);
+      color: var(--text);
+      line-height: 1.55;
+      letter-spacing: 0.01em;
+    }
+
+    a {
+      color: inherit;
+      text-decoration: none;
+    }
+
+    code,
+    pre,
+    .mono,
+    .meta-label,
+    .metric-label,
+    .latency-label,
+    .section-kicker,
+    .prompt-index,
+    .figure-caption span {
+      font-family: "IBM Plex Mono", monospace;
+    }
+
+    .console {
+      width: min(calc(100% - 32px), var(--max));
+      margin: 0 auto;
+      padding: 24px 0 80px;
+    }
+
+    .topbar {
+      position: sticky;
+      top: 0;
+      z-index: 20;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+      padding: 14px 18px;
+      margin-bottom: 24px;
+      backdrop-filter: blur(14px);
+      background: rgba(5, 5, 5, 0.82);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      border-radius: 999px;
+      box-shadow: var(--shadow);
+    }
+
+    .topbar-title {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      min-width: 0;
+    }
+
+    .status-dot {
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+      background: #f2f2f2;
+      box-shadow: 0 0 0 6px rgba(255, 255, 255, 0.08);
+      flex: 0 0 auto;
+    }
+
+    .topbar strong {
+      font-size: 0.92rem;
+      display: block;
+      white-space: nowrap;
+    }
+
+    .topbar small {
+      display: block;
+      color: var(--text-dim);
+      font-size: 0.75rem;
+      white-space: nowrap;
+    }
+
+    .topnav {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: flex-end;
+      gap: 10px;
+    }
+
+    .topnav a {
+      padding: 8px 12px;
+      border-radius: 999px;
+      border: 1px solid var(--line);
+      color: var(--text-soft);
+      font-size: 0.78rem;
+      text-transform: uppercase;
+      letter-spacing: 0.12em;
+    }
+
+    .hero {
+      display: grid;
+      grid-template-columns: minmax(0, 1.45fr) minmax(320px, 0.75fr);
+      gap: 24px;
+      margin-bottom: 24px;
+    }
+
+    .hero-copy,
+    .hero-side,
+    .metrics-rail,
+    .band,
+    .panel,
+    .figure-frame,
+    .code-frame,
+    .latency-table,
+    .decision-grid article,
+    .role-grid article,
+    .governance-grid article,
+    .closing-panel {
+      background:
+        linear-gradient(180deg, rgba(255, 255, 255, 0.03), rgba(255, 255, 255, 0.015)),
+        var(--panel);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+    }
+
+    .hero-copy {
+      padding: 34px;
+      min-height: 100%;
+    }
+
+    .eyebrow {
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      margin: 0 0 18px;
+      color: var(--text-soft);
+      text-transform: uppercase;
+      letter-spacing: 0.18em;
+      font-size: 0.77rem;
+    }
+
+    .eyebrow::before {
+      content: "";
+      width: 42px;
+      height: 1px;
+      background: var(--line-strong);
+    }
+
+    h1 {
+      margin: 0;
+      font-size: clamp(2.7rem, 6vw, 5.2rem);
+      line-height: 0.93;
+      letter-spacing: -0.05em;
+      text-transform: uppercase;
+      max-width: 12ch;
+    }
+
+    .hero-copy .standfirst {
+      margin: 22px 0 0;
+      font-size: 1.08rem;
+      color: var(--text-soft);
+      max-width: 64ch;
+    }
+
+    .hero-copy .standfirst strong {
+      color: var(--text);
+    }
+
+    .hero-side {
+      padding: 28px;
+      display: grid;
+      grid-template-rows: auto auto 1fr;
+      gap: 20px;
+    }
+
+    .hero-side h2 {
+      margin: 0;
+      font-size: 1rem;
+      text-transform: uppercase;
+      letter-spacing: 0.12em;
+      color: var(--text-soft);
+    }
+
+    .signal-board {
+      display: grid;
+      gap: 12px;
+    }
+
+    .signal-row {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) auto;
+      align-items: start;
+      gap: 14px;
+      padding: 14px 0;
+      border-top: 1px solid rgba(255, 255, 255, 0.08);
+    }
+
+    .signal-row:first-child {
+      border-top: 0;
+      padding-top: 0;
+    }
+
+    .signal-row strong {
+      display: block;
+      font-size: 0.95rem;
+    }
+
+    .signal-row p {
+      margin: 5px 0 0;
+      font-size: 0.88rem;
+      color: var(--text-dim);
+    }
+
+    .delta {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      min-width: 84px;
+      padding: 8px 12px;
+      border-radius: 999px;
+      border: 1px solid var(--line-strong);
+      background: var(--panel-2);
+      font-family: "IBM Plex Mono", monospace;
+      font-size: 0.8rem;
+      color: var(--text);
+    }
+
+    .hero-note {
+      padding: 16px 18px;
+      border-radius: var(--radius-sm);
+      background: var(--panel-2);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      color: var(--text-soft);
+      font-size: 0.92rem;
+    }
+
+    .metrics-rail {
+      display: grid;
+      grid-template-columns: repeat(6, minmax(0, 1fr));
+      gap: 1px;
+      overflow: hidden;
+      margin-bottom: 24px;
+      background: var(--line);
+    }
+
+    .metric {
+      padding: 22px 20px 18px;
+      background: var(--panel);
+    }
+
+    .metric-label {
+      display: block;
+      font-size: 0.72rem;
+      color: var(--text-dim);
+      text-transform: uppercase;
+      letter-spacing: 0.12em;
+      margin-bottom: 12px;
+    }
+
+    .metric-value {
+      display: block;
+      font-size: clamp(1.8rem, 3vw, 2.5rem);
+      line-height: 0.95;
+      letter-spacing: -0.04em;
+      margin-bottom: 8px;
+    }
+
+    .metric p {
+      margin: 0;
+      color: var(--text-soft);
+      font-size: 0.9rem;
+    }
+
+    .content {
+      display: grid;
+      gap: 24px;
+    }
+
+    .band {
+      display: grid;
+      grid-template-columns: 240px minmax(0, 1fr);
+      gap: 24px;
+      padding: 30px;
+      align-items: start;
+    }
+
+    .section-kicker {
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      color: var(--text-dim);
+      text-transform: uppercase;
+      letter-spacing: 0.14em;
+      font-size: 0.73rem;
+      margin-bottom: 16px;
+    }
+
+    .section-kicker::before {
+      content: "";
+      width: 30px;
+      height: 1px;
+      background: var(--line-strong);
+    }
+
+    .prompt-index {
+      display: block;
+      font-size: 0.75rem;
+      color: var(--text-dim);
+      text-transform: uppercase;
+      letter-spacing: 0.18em;
+      margin-bottom: 16px;
+    }
+
+    h2 {
+      margin: 0 0 18px;
+      font-size: clamp(1.7rem, 3vw, 2.7rem);
+      line-height: 1.02;
+      text-transform: uppercase;
+      letter-spacing: -0.03em;
+      max-width: 18ch;
+    }
+
+    .band p,
+    .panel p,
+    .closing-panel p {
+      margin: 0 0 16px;
+      color: var(--text-soft);
+      font-size: 1rem;
+    }
+
+    .band p:last-child,
+    .panel p:last-child,
+    .closing-panel p:last-child {
+      margin-bottom: 0;
+    }
+
+    .summary-list,
+    .decision-list,
+    .role-list,
+    .cadence-list {
+      margin: 18px 0 0;
+      padding: 0;
+      list-style: none;
+      display: grid;
+      gap: 10px;
+    }
+
+    .summary-list li,
+    .decision-list li,
+    .role-list li,
+    .cadence-list li {
+      position: relative;
+      padding-left: 18px;
+      color: var(--text-soft);
+    }
+
+    .summary-list li::before,
+    .decision-list li::before,
+    .role-list li::before,
+    .cadence-list li::before {
+      content: "";
+      position: absolute;
+      top: 0.7em;
+      left: 0;
+      width: 7px;
+      height: 7px;
+      border-radius: 50%;
+      background: #f0f0f0;
+      box-shadow: 0 0 0 4px rgba(255, 255, 255, 0.05);
+    }
+
+    .latency-grid,
+    .role-grid,
+    .decision-grid,
+    .governance-grid {
+      display: grid;
+      gap: 18px;
+    }
+
+    .latency-grid {
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+    }
+
+    .panel {
+      padding: 24px;
+    }
+
+    .panel h3,
+    .closing-panel h3,
+    .role-grid h3,
+    .decision-grid h3,
+    .governance-grid h3 {
+      margin: 0 0 12px;
+      font-size: 1rem;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+    }
+
+    .latency-pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 8px 12px;
+      border-radius: 999px;
+      background: #f3f3f3;
+      color: #080808;
+      font-size: 0.78rem;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      margin-bottom: 14px;
+    }
+
+    .figure-frame {
+      padding: 26px;
+      overflow-x: auto;
+    }
+
+    figure {
+      margin: 0;
+    }
+
+    svg {
+      display: block;
+      width: 100%;
+      height: auto;
+    }
+
+    .figure-caption {
+      margin-top: 14px;
+      display: grid;
+      gap: 4px;
+      color: var(--text-soft);
+      font-size: 0.92rem;
+    }
+
+    .figure-caption span {
+      color: var(--text-dim);
+      font-size: 0.72rem;
+      text-transform: uppercase;
+      letter-spacing: 0.12em;
+    }
+
+    .latency-table {
+      padding: 20px;
+      overflow-x: auto;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      min-width: 740px;
+    }
+
+    th,
+    td {
+      padding: 14px 12px;
+      text-align: left;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+      vertical-align: top;
+    }
+
+    th {
+      font-size: 0.75rem;
+      color: var(--text-dim);
+      text-transform: uppercase;
+      letter-spacing: 0.14em;
+      font-family: "IBM Plex Mono", monospace;
+      font-weight: 500;
+    }
+
+    td {
+      color: var(--text-soft);
+      font-size: 0.94rem;
+    }
+
+    .code-grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 18px;
+    }
+
+    .code-frame {
+      padding: 20px;
+    }
+
+    .code-frame h3 {
+      margin: 0 0 12px;
+      font-size: 0.95rem;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      color: var(--text-soft);
+    }
+
+    pre {
+      margin: 0;
+      padding: 16px;
+      border-radius: var(--radius-sm);
+      background: #080808;
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      color: #efefef;
+      font-size: 0.82rem;
+      line-height: 1.55;
+      overflow-x: auto;
+      white-space: pre;
+    }
+
+    .role-grid {
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+    }
+
+    .role-grid article,
+    .decision-grid article,
+    .governance-grid article {
+      padding: 22px;
+    }
+
+    .role-head,
+    .decision-head {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      margin-bottom: 12px;
+    }
+
+    .role-chip,
+    .decision-chip {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      padding: 7px 10px;
+      border-radius: 999px;
+      background: var(--chip);
+      color: var(--chip-text);
+      font-family: "IBM Plex Mono", monospace;
+      font-size: 0.72rem;
+      text-transform: uppercase;
+      letter-spacing: 0.12em;
+      white-space: nowrap;
+    }
+
+    .decision-grid {
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+    }
+
+    .governance-grid {
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+    }
+
+    .closing-panel {
+      padding: 28px;
+      display: grid;
+      grid-template-columns: minmax(0, 1.2fr) minmax(280px, 0.8fr);
+      gap: 24px;
+      align-items: start;
+    }
+
+    .meta-stack {
+      display: grid;
+      gap: 12px;
+    }
+
+    .meta-box {
+      padding: 14px 16px;
+      border-radius: var(--radius-sm);
+      background: var(--panel-2);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+    }
+
+    .meta-label {
+      display: block;
+      color: var(--text-dim);
+      font-size: 0.7rem;
+      text-transform: uppercase;
+      letter-spacing: 0.14em;
+      margin-bottom: 6px;
+    }
+
+    .meta-box strong {
+      display: block;
+      font-size: 1rem;
+    }
+
+    .footnote {
+      margin-top: 22px;
+      color: var(--text-dim);
+      font-size: 0.82rem;
+    }
+
+    @media (max-width: 1120px) {
+      .hero,
+      .closing-panel,
+      .code-grid,
+      .latency-grid,
+      .role-grid,
+      .decision-grid,
+      .governance-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .metrics-rail {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+      }
+
+      .band {
+        grid-template-columns: 1fr;
+      }
+
+      h2 {
+        max-width: none;
+      }
+    }
+
+    @media (max-width: 720px) {
+      .console {
+        width: min(calc(100% - 20px), var(--max));
+        padding-top: 14px;
+      }
+
+      .topbar {
+        border-radius: 24px;
+        padding: 14px;
+      }
+
+      .topbar,
+      .topbar-title {
+        align-items: flex-start;
+      }
+
+      .topnav {
+        justify-content: flex-start;
+      }
+
+      .hero-copy,
+      .hero-side,
+      .band,
+      .figure-frame,
+      .panel,
+      .latency-table,
+      .code-frame,
+      .closing-panel {
+        padding: 20px;
+      }
+
+      .metrics-rail {
+        grid-template-columns: 1fr;
+      }
+
+      h1 {
+        max-width: none;
+        font-size: clamp(2.4rem, 12vw, 4rem);
+      }
+    }
+  </style>
+</head>
+<body>
+  <main class="console">
+    <header class="topbar">
+      <div class="topbar-title">
+        <span class="status-dot" aria-hidden="true"></span>
+        <div>
+          <strong>Campaign Control Room</strong>
+          <small>Near-real-time marketing decisions, defined in minutes and operators</small>
+        </div>
+      </div>
+      <nav class="topnav" aria-label="Section navigation">
+        <a href="#lag">Lag Signal</a>
+        <a href="#sources">Sources + Latency</a>
+        <a href="#assembly">KPI Assembly</a>
+        <a href="#roles">Role Views</a>
+        <a href="#decisions">Decisions</a>
+      </nav>
+    </header>
+
+    <section class="hero" id="top">
+      <article class="hero-copy">
+        <p class="eyebrow">Marketing Analytics • Control-Room Story</p>
+        <h1>Real-Time Marketing Decision Engine</h1>
+        <p class="standfirst">At 10:12, paid search was still buying as if the morning offer held. It did not. <strong>Response softened in chat first, then social replies turned colder, then conversion rate slipped hard enough to make the spend curve look irresponsible.</strong> The operating problem is not abstract dashboard hunger. It is a live campaign running fifteen to forty minutes ahead of the humans accountable for it. This page describes the room built to close that gap: workshops to pin down decision moments, a governed KPI taxonomy with owners and formulas, near-real-time data pipelines merging feedback, channel performance, and spend, and role-based surfaces that tell each operator what they need to decide before the next media hour starts. Here, “real time” does not mean millisecond theater. It means feedback signals arriving inside two to six minutes, platform and spend facts reconciling inside eight to fifteen, and a staffed workflow that can throttle, swap creative, or reroute budget before waste compounds through the shift.</p>
+      </article>
+
+      <aside class="hero-side" aria-label="Shift summary">
+        <div>
+          <h2>Lagging Insight</h2>
+        </div>
+        <div class="signal-board">
+          <div class="signal-row">
+            <div>
+              <strong>Search CPA drifted above guardrail while clicks still looked healthy.</strong>
+              <p>Fifteen-minute CPA climbed from 82 to 97 while the buying rules were still tuned to an earlier creative mix.</p>
+            </div>
+            <span class="delta">+18.3%</span>
+          </div>
+          <div class="signal-row">
+            <div>
+              <strong>Live feedback deteriorated before the media dashboards caught up.</strong>
+              <p>Chat mentions of “misleading discount” doubled nine minutes before the first platform-side conversion warning.</p>
+            </div>
+            <span class="delta">9 min lead</span>
+          </div>
+          <div class="signal-row">
+            <div>
+              <strong>Budget pacing stayed on target, but target quality did not.</strong>
+              <p>The room needed a decision surface that joins spend, response, and customer reaction on one operating clock.</p>
+            </div>
+            <span class="delta">1 brief</span>
+          </div>
+        </div>
+        <div class="hero-note">The system exists to answer a managerial question fast: what changed, who owns the response, and how much time remains before the next hour of spend is committed on stale assumptions?</div>
+      </aside>
+    </section>
+
+    <section class="metrics-rail" aria-label="Top-line shift figures">
+      <div class="metric">
+        <span class="metric-label">Feedback Ingest</span>
+        <strong class="metric-value">2-6 min</strong>
+        <p>Chat, survey comments, CRM notes, and social replies normalized into a common campaign grain.</p>
+      </div>
+      <div class="metric">
+        <span class="metric-label">Spend + Delivery</span>
+        <strong class="metric-value">8-15 min</strong>
+        <p>Platform facts lag more than feedback, so the room publishes freshness alongside every chart.</p>
+      </div>
+      <div class="metric">
+        <span class="metric-label">KPI Owners</span>
+        <strong class="metric-value">1 owner</strong>
+        <p>Each metric has a named steward, threshold, fallback rule, and review cadence.</p>
+      </div>
+      <div class="metric">
+        <span class="metric-label">Alert Window</span>
+        <strong class="metric-value">15 min</strong>
+        <p>The fastest alert is not “latest event.” It is a stable enough window to act without chasing noise.</p>
+      </div>
+      <div class="metric">
+        <span class="metric-label">Scenario Refresh</span>
+        <strong class="metric-value">30 min</strong>
+        <p>Reallocation and creative swap scenarios are refreshed on the half hour during active campaign shifts.</p>
+      </div>
+      <div class="metric">
+        <span class="metric-label">Governance Check</span>
+        <strong class="metric-value">Weekly</strong>
+        <p>KPI changes, threshold overrides, and A/B readout logic move through a formal cadence rather than ad hoc edits.</p>
+      </div>
+    </section>
+
+    <div class="content">
+      <section class="band" id="lag">
+        <div>
+          <span class="prompt-index">Shift Prompt 01</span>
+          <h2>Why did performance look acceptable until the wrong hour was already bought?</h2>
+        </div>
+        <div>
+          <p>The control room opens on a failure mode that marketers know but rarely instrument well: the campaign is not exactly blind, but the facts arrive on different clocks and are reviewed by different people. Spend is visible. Clicks are visible. Conversions are visible with caveats. Customer reaction, usually the earliest sign that the message or promise is breaking down, arrives in unstructured fragments and is often treated as a separate service issue instead of a campaign signal. The result is a familiar lag. A growth lead sees the media dashboard still within pacing tolerance and waits. A channel manager sees that one line item is heating up but cannot tell whether it is efficient heat or expensive friction. Support notices tone change first, but the finding sits outside the budget conversation. By the time the views converge, the room is explaining waste instead of preventing it.</p>
+          <p>This engine is designed around decision moments rather than vanity freshness. Stakeholder workshops define where the room can actually intervene: pause a creative set, throttle a channel, shift budget between cohorts, suppress a deteriorating audience, or hold steady because the signal has not cleared a minimum evidence threshold. That is why the time promises are operationally specific. “Real time” for this room means enough signal, in enough context, soon enough to change the next action. A two-minute chat spike matters because it can force a watch state. A ten-minute spend feed matters because it grounds the cost of waiting. A fifteen-minute alert matters because it is the smallest window the operators trust to separate a genuine performance drift from temporary placement noise.</p>
+          <ul class="summary-list">
+            <li>The room treats customer feedback as a campaign signal, not just a service byproduct.</li>
+            <li>Every metric is published with freshness so nobody mistakes a late source for a stable outcome.</li>
+            <li>Decision support is anchored to media hours, shift handoffs, and review cadences, not to abstract streaming claims.</li>
+          </ul>
+        </div>
+      </section>
+
+      <section class="figure-frame" id="sources">
+        <figure>
+          <svg viewBox="0 0 1360 520" role="img" aria-labelledby="signal-conveyor-title signal-conveyor-desc">
+            <title id="signal-conveyor-title">Signal conveyor from left-side sources to role-specific decision surfaces</title>
+            <desc id="signal-conveyor-desc">A left-to-right conveyor showing customer feedback, spend, and channel performance entering with different latencies, then passing through normalization, quality checks, KPI assembly, and ending as role-specific decision surfaces.</desc>
+            <defs>
+              <linearGradient id="belt" x1="0%" y1="0%" x2="100%" y2="0%">
+                <stop offset="0%" stop-color="#171717"></stop>
+                <stop offset="100%" stop-color="#2a2a2a"></stop>
+              </linearGradient>
+            </defs>
+            <rect x="20" y="40" width="1320" height="440" rx="28" fill="#0d0d0d" stroke="#3e3e3e"></rect>
+            <rect x="76" y="206" width="1208" height="90" rx="45" fill="url(#belt)" stroke="#5a5a5a"></rect>
+            <g fill="#f4f4f4" font-family="'IBM Plex Mono', monospace" font-size="16" letter-spacing="2">
+              <text x="102" y="112">INPUT SOURCES</text>
+              <text x="560" y="112">PIPELINE + GOVERNANCE</text>
+              <text x="1048" y="112">DECISION SURFACES</text>
+            </g>
+            <g>
+              <rect x="92" y="138" width="220" height="120" rx="18" fill="#101010" stroke="#707070"></rect>
+              <text x="116" y="172" fill="#f5f5f5" font-size="22" font-family="'Space Grotesk', sans-serif">Customer feedback</text>
+              <text x="116" y="204" fill="#b7b7b7" font-size="18" font-family="'Space Grotesk', sans-serif">chat, survey, CRM, social</text>
+              <rect x="116" y="219" width="110" height="24" rx="12" fill="#efefef"></rect>
+              <text x="132" y="236" fill="#090909" font-size="14" font-family="'IBM Plex Mono', monospace">2-6 min</text>
+            </g>
+            <g>
+              <rect x="92" y="278" width="220" height="120" rx="18" fill="#101010" stroke="#707070"></rect>
+              <text x="116" y="312" fill="#f5f5f5" font-size="22" font-family="'Space Grotesk', sans-serif">Spend facts</text>
+              <text x="116" y="344" fill="#b7b7b7" font-size="18" font-family="'Space Grotesk', sans-serif">platform cost, pacing, invoice rules</text>
+              <rect x="116" y="359" width="126" height="24" rx="12" fill="#efefef"></rect>
+              <text x="132" y="376" fill="#090909" font-size="14" font-family="'IBM Plex Mono', monospace">8-15 min</text>
+            </g>
+            <g>
+              <rect x="364" y="152" width="220" height="92" rx="18" fill="#151515" stroke="#707070"></rect>
+              <text x="388" y="187" fill="#f5f5f5" font-size="21" font-family="'Space Grotesk', sans-serif">Channel performance</text>
+              <text x="388" y="217" fill="#b7b7b7" font-size="18" font-family="'Space Grotesk', sans-serif">impressions, clicks, CVR</text>
+              <rect x="388" y="222" width="126" height="24" rx="12" fill="#efefef"></rect>
+              <text x="404" y="239" fill="#090909" font-size="14" font-family="'IBM Plex Mono', monospace">5-12 min</text>
+            </g>
+            <g stroke="#e6e6e6" stroke-width="3" fill="none">
+              <path d="M314 196 H358"></path>
+              <path d="M314 338 H358 V245"></path>
+              <path d="M584 196 H650"></path>
+              <path d="M814 196 H882"></path>
+              <path d="M1052 196 H1122"></path>
+            </g>
+            <g fill="#efefef">
+              <polygon points="358,196 343,188 343,204"></polygon>
+              <polygon points="358,245 343,237 343,253"></polygon>
+              <polygon points="650,196 635,188 635,204"></polygon>
+              <polygon points="882,196 867,188 867,204"></polygon>
+              <polygon points="1122,196 1107,188 1107,204"></polygon>
+            </g>
+            <g>
+              <rect x="650" y="138" width="164" height="116" rx="18" fill="#111111" stroke="#737373"></rect>
+              <text x="675" y="174" fill="#f5f5f5" font-size="21" font-family="'Space Grotesk', sans-serif">Normalize</text>
+              <text x="675" y="205" fill="#b7b7b7" font-size="16" font-family="'Space Grotesk', sans-serif">campaign, cohort,</text>
+              <text x="675" y="226" fill="#b7b7b7" font-size="16" font-family="'Space Grotesk', sans-serif">hour shared grain</text>
+            </g>
+            <g>
+              <rect x="882" y="138" width="170" height="116" rx="18" fill="#111111" stroke="#737373"></rect>
+              <text x="908" y="174" fill="#f5f5f5" font-size="21" font-family="'Space Grotesk', sans-serif">Quality gate</text>
+              <text x="908" y="205" fill="#b7b7b7" font-size="17" font-family="'Space Grotesk', sans-serif">freshness, joins,</text>
+              <text x="908" y="229" fill="#b7b7b7" font-size="17" font-family="'Space Grotesk', sans-serif">missing-source flags</text>
+            </g>
+            <g>
+              <rect x="1122" y="138" width="176" height="116" rx="18" fill="#f2f2f2" stroke="#f2f2f2"></rect>
+              <text x="1146" y="174" fill="#0a0a0a" font-size="21" font-family="'Space Grotesk', sans-serif">Role views</text>
+              <text x="1146" y="205" fill="#1a1a1a" font-size="17" font-family="'Space Grotesk', sans-serif">VP, growth, channel,</text>
+              <text x="1146" y="229" fill="#1a1a1a" font-size="17" font-family="'Space Grotesk', sans-serif">analyst surfaces</text>
+            </g>
+            <g fill="#d5d5d5" font-family="'IBM Plex Mono', monospace" font-size="15">
+              <text x="110" y="431">FEEDBACK LEADS THE ROOM</text>
+              <text x="462" y="431">KPI ASSEMBLY HOLDS ON A FIVE-MINUTE LOOP</text>
+              <text x="946" y="431">ACTIONS: THROTTLE, SWAP, REROUTE, HOLD</text>
+            </g>
+            <g stroke="#5e5e5e" stroke-dasharray="8 8">
+              <line x1="327" y1="126" x2="327" y2="392"></line>
+              <line x1="628" y1="126" x2="628" y2="392"></line>
+              <line x1="852" y1="126" x2="852" y2="392"></line>
+              <line x1="1089" y1="126" x2="1089" y2="392"></line>
+            </g>
+          </svg>
+          <figcaption class="figure-caption">
+            <span>Figure 1 • Signal Conveyor</span>
+            Feedback, spend, and channel performance enter on different clocks, pass through normalization and quality checks, and land as role-specific decision surfaces with latency disclosed instead of hidden.
+          </figcaption>
+        </figure>
+      </section>
+
+      <section class="band">
+        <div>
+          <span class="prompt-index">Shift Prompt 02</span>
+          <h2>What can the room trust now, what is still settling, and who needs to know?</h2>
+        </div>
+        <div>
+          <p>Source handling is explicit because a control room collapses without freshness discipline. Feedback sources include surveys, chat transcripts, social replies, CRM notes, and campaign-coded support tickets. They arrive fastest, but they are noisier and need light normalization: campaign mapping, channel tagging, sentiment scoring, issue taxonomy, and deduplication. Channel performance follows from ad platforms and web analytics with their own refresh behavior and attribution caveats. Spend facts may lag more than click facts, and true cost can lag more than visible platform spend when fees, refunds, or offline adjustments are involved. The engine does not flatten these realities. It publishes them.</p>
+          <p>That design choice sounds plain, but it changes behavior. When the executive view shows that social complaints are fresh to four minutes while platform conversion rate is fresh only to twelve, the room can move into watch mode without pretending the conversion truth is final. When the channel manager sees a missing spend feed flag, they know to avoid over-correcting on one apparently cheap pocket of traffic. When the analyst sees an attribution delay marker, they can frame the scenario view correctly: interim efficiency is a directional read, not the close. This is what makes the system operational rather than theatrical. It acknowledges latency, tells you what is known, and lets action scale with confidence instead of gut feel.</p>
+        </div>
+      </section>
+
+      <section class="latency-grid" aria-label="Latency expectations">
+        <article class="panel">
+          <div class="latency-pill">Fast signal</div>
+          <h3>Customer feedback</h3>
+          <p>Chat, surveys, CRM notes, and social replies are the room’s early-warning layer. They should land within two to six minutes, because their job is to flag message breakage before spend-heavy sources finish updating.</p>
+          <ul class="cadence-list">
+            <li>Used for watch states, issue clustering, and creative confidence checks.</li>
+            <li>Thresholds tolerate moderate noise but punish sustained deterioration.</li>
+          </ul>
+        </article>
+        <article class="panel">
+          <div class="latency-pill">Core signal</div>
+          <h3>Channel performance</h3>
+          <p>Impressions, clicks, CTR, landing conversion, and cohort splits usually stabilize inside five to twelve minutes. This is the layer that confirms whether the feedback change is also material in behavior.</p>
+          <ul class="cadence-list">
+            <li>Used for budget shift proposals, audience suppression, and channel throttles.</li>
+            <li>Published with freshness badges and cohort availability markers.</li>
+          </ul>
+        </article>
+        <article class="panel">
+          <div class="latency-pill">Reconciling signal</div>
+          <h3>Spend and cost</h3>
+          <p>Cost and pacing are allowed eight to fifteen minutes, sometimes longer at source close. They matter because every delayed decision has a spend consequence that should be quantified.</p>
+          <ul class="cadence-list">
+            <li>Used for pacing interventions, hold-or-cut calls, and finance-safe reporting.</li>
+            <li>Missing spend flags block aggressive reallocation recommendations.</li>
+          </ul>
+        </article>
+      </section>
+
+      <section class="latency-table">
+        <table>
+          <thead>
+            <tr>
+              <th>Source family</th>
+              <th>Examples</th>
+              <th>Expected latency</th>
+              <th>Primary owner</th>
+              <th>Operational use</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>Feedback</td>
+              <td>Survey comments, chat, CRM notes, social replies</td>
+              <td>2-6 minutes</td>
+              <td>Customer insight lead</td>
+              <td>Detect message mismatch, issue spikes, sentiment shifts</td>
+            </tr>
+            <tr>
+              <td>Channel performance</td>
+              <td>Impressions, clicks, sessions, CVR, cohort splits</td>
+              <td>5-12 minutes</td>
+              <td>Channel operations manager</td>
+              <td>Validate drift, compare cohorts, rank pressure points</td>
+            </tr>
+            <tr>
+              <td>Spend and pacing</td>
+              <td>Platform cost, budget burn, fee-adjusted spend</td>
+              <td>8-15 minutes</td>
+              <td>Growth operations</td>
+              <td>Price the cost of waiting, approve reallocation</td>
+            </tr>
+            <tr>
+              <td>Experiment readouts</td>
+              <td>A/B split, lift estimate, stopping guardrails</td>
+              <td>30-60 minutes</td>
+              <td>Analytics lead</td>
+              <td>Decide keep, kill, or extend test logic</td>
+            </tr>
+          </tbody>
+        </table>
+      </section>
+
+      <section class="band" id="assembly">
+        <div>
+          <span class="prompt-index">Shift Prompt 03</span>
+          <h2>Which metrics are assembled every five minutes, and which wait for review cadence?</h2>
+        </div>
+        <div>
+          <p>The KPI taxonomy is the backbone. Workshops identify the decision moments; the taxonomy converts those moments into shared formulas, owners, thresholds, and cadences. The room does not just say “efficiency” or “engagement.” It defines a five-minute CPA, a thirty-minute sentiment delta, an hourly budget burn ratio, a daily blended efficiency, and a weekly experiment confidence index. Some metrics are designed for immediate action and use short windows with strong freshness requirements. Others are deliberately slower because they support review, not intervention. That split protects the operators from using a boardroom metric to manage a live shift or using a volatile shift metric to rewrite strategy.</p>
+          <p>Assembly also standardizes grain. Every signal is aligned by campaign, channel, audience, creative, and time bucket so that role-based views inherit one truth instead of stitching local versions together. Data quality checks run before the metric leaves the pipeline: freshness thresholds, missing-source detection, duplicate event scans, threshold sanity checks, and backtest comparisons against known periods. A metric that fails its guardrail can still be shown, but it is downgraded, badged, and prevented from triggering the stronger interventions. That matters because the control room is not trying to eliminate uncertainty. It is trying to make uncertainty visible and manageable.</p>
+        </div>
+      </section>
+
+      <section class="figure-frame">
+        <figure>
+          <svg viewBox="0 0 1360 620" role="img" aria-labelledby="assembly-title assembly-desc">
+            <title id="assembly-title">KPI assembly and role hierarchy companion figure</title>
+            <desc id="assembly-desc">A diagram showing raw source events entering KPI assembly, then branching upward to executive, growth lead, channel manager, and analyst views with different cadences and decisions.</desc>
+            <rect x="24" y="28" width="1312" height="564" rx="28" fill="#0d0d0d" stroke="#3e3e3e"></rect>
+            <g>
+              <rect x="84" y="132" width="248" height="324" rx="24" fill="#111111" stroke="#707070"></rect>
+              <text x="114" y="176" fill="#f4f4f4" font-size="26" font-family="'Space Grotesk', sans-serif">Raw signal stack</text>
+              <text x="114" y="216" fill="#bdbdbd" font-size="19" font-family="'Space Grotesk', sans-serif">feedback events</text>
+              <text x="114" y="246" fill="#bdbdbd" font-size="19" font-family="'Space Grotesk', sans-serif">channel facts</text>
+              <text x="114" y="276" fill="#bdbdbd" font-size="19" font-family="'Space Grotesk', sans-serif">spend records</text>
+              <text x="114" y="306" fill="#bdbdbd" font-size="19" font-family="'Space Grotesk', sans-serif">cohort attributes</text>
+              <text x="114" y="336" fill="#bdbdbd" font-size="19" font-family="'Space Grotesk', sans-serif">experiment flags</text>
+              <rect x="114" y="378" width="152" height="28" rx="14" fill="#efefef"></rect>
+              <text x="132" y="397" fill="#090909" font-size="15" font-family="'IBM Plex Mono', monospace">shared campaign grain</text>
+            </g>
+            <g>
+              <rect x="410" y="104" width="312" height="480" rx="24" fill="#171717" stroke="#707070"></rect>
+              <text x="444" y="150" fill="#f4f4f4" font-size="27" font-family="'Space Grotesk', sans-serif">KPI assembly</text>
+              <text x="444" y="192" fill="#c9c9c9" font-size="19" font-family="'Space Grotesk', sans-serif">formula</text>
+              <text x="542" y="192" fill="#9d9d9d" font-size="19" font-family="'Space Grotesk', sans-serif">owner</text>
+              <text x="620" y="192" fill="#9d9d9d" font-size="19" font-family="'Space Grotesk', sans-serif">threshold</text>
+              <line x1="444" y1="208" x2="686" y2="208" stroke="#555555"></line>
+              <text x="444" y="244" fill="#f4f4f4" font-size="18" font-family="'Space Grotesk', sans-serif">CPA_15M = spend / conversions</text>
+              <text x="444" y="278" fill="#f4f4f4" font-size="18" font-family="'Space Grotesk', sans-serif">Sentiment_D30 = now - prior 30m</text>
+              <text x="444" y="312" fill="#f4f4f4" font-size="18" font-family="'Space Grotesk', sans-serif">Pace_H1 = actual / planned</text>
+              <text x="444" y="346" fill="#f4f4f4" font-size="18" font-family="'Space Grotesk', sans-serif">Blend_Eff_D1 = revenue / spend</text>
+              <text x="444" y="380" fill="#f4f4f4" font-size="18" font-family="'Space Grotesk', sans-serif">Test_Lift = exposed - control</text>
+              <rect x="444" y="414" width="228" height="38" rx="19" fill="#0b0b0b" stroke="#5d5d5d"></rect>
+              <text x="468" y="438" fill="#ececec" font-size="17" font-family="'IBM Plex Mono', monospace">quality gate before alerting</text>
+            </g>
+            <g stroke="#e8e8e8" stroke-width="4" fill="none">
+              <path d="M332 294 H404"></path>
+              <path d="M722 182 H838"></path>
+              <path d="M722 298 H838"></path>
+              <path d="M722 414 H838"></path>
+              <path d="M722 530 H838"></path>
+            </g>
+            <g fill="#efefef">
+              <polygon points="404,294 387,285 387,303"></polygon>
+              <polygon points="838,182 822,174 822,190"></polygon>
+              <polygon points="838,298 822,290 822,306"></polygon>
+              <polygon points="838,414 822,406 822,422"></polygon>
+              <polygon points="838,530 822,522 822,538"></polygon>
+            </g>
+            <g>
+              <rect x="838" y="124" width="412" height="116" rx="20" fill="#f2f2f2" stroke="#f2f2f2"></rect>
+              <text x="868" y="162" fill="#090909" font-size="23" font-family="'Space Grotesk', sans-serif">Executive surface</text>
+              <text x="868" y="193" fill="#262626" font-size="18" font-family="'Space Grotesk', sans-serif">hourly health, risk concentration,</text>
+              <text x="868" y="217" fill="#262626" font-size="18" font-family="'Space Grotesk', sans-serif">hold vs reroute</text>
+            </g>
+            <g>
+              <rect x="838" y="240" width="412" height="116" rx="20" fill="#d8d8d8" stroke="#d8d8d8"></rect>
+              <text x="868" y="278" fill="#090909" font-size="23" font-family="'Space Grotesk', sans-serif">Growth lead surface</text>
+              <text x="868" y="309" fill="#262626" font-size="18" font-family="'Space Grotesk', sans-serif">scenario moves, pacing interventions,</text>
+              <text x="868" y="333" fill="#262626" font-size="18" font-family="'Space Grotesk', sans-serif">watch states</text>
+            </g>
+            <g>
+              <rect x="838" y="356" width="412" height="116" rx="20" fill="#bcbcbc" stroke="#bcbcbc"></rect>
+              <text x="868" y="394" fill="#090909" font-size="23" font-family="'Space Grotesk', sans-serif">Channel manager surface</text>
+              <text x="868" y="425" fill="#262626" font-size="18" font-family="'Space Grotesk', sans-serif">placement drill-down, audience suppression,</text>
+              <text x="868" y="449" fill="#262626" font-size="18" font-family="'Space Grotesk', sans-serif">creative swaps</text>
+            </g>
+            <g>
+              <rect x="838" y="472" width="412" height="116" rx="20" fill="#8f8f8f" stroke="#8f8f8f"></rect>
+              <text x="868" y="510" fill="#090909" font-size="23" font-family="'Space Grotesk', sans-serif">Analyst surface</text>
+              <text x="868" y="541" fill="#181818" font-size="18" font-family="'Space Grotesk', sans-serif">cohorts, anomaly review, backtests,</text>
+              <text x="868" y="565" fill="#181818" font-size="18" font-family="'Space Grotesk', sans-serif">experiment readouts</text>
+            </g>
+            <text x="88" y="84" fill="#d7d7d7" font-size="16" font-family="'IBM Plex Mono', monospace" letter-spacing="2">FROM SOURCE EVENTS TO ROLE-SPECIFIC CONTROL SURFACES</text>
+          </svg>
+          <figcaption class="figure-caption">
+            <span>Figure 2 • KPI Assembly + Role Hierarchy</span>
+            Raw signals are standardized into owned formulas, checked for quality, and then branched into executive, growth, channel, and analyst surfaces so each role sees the same truth at the right level of action.
+          </figcaption>
+        </figure>
+      </section>
+
+      <section class="code-grid" aria-label="Implementation snippets">
+        <article class="code-frame">
+          <h3>Five-minute aggregation loop</h3>
+          <pre><code>with five_minute as (
+  select
+    campaign_id,
+    channel,
+    date_trunc('minute', event_time)
+      - interval '1 minute' * (extract(minute from event_time)::int % 5)
+      as bucket_start,
+    sum(spend) as spend,
+    sum(clicks) as clicks,
+    sum(conversions) as conversions,
+    avg(sentiment_score) as sentiment_score
+  from marketing_signal_fact
+  where event_time &gt;= now() - interval '90 minutes'
+  group by 1, 2, 3
+)
+select *,
+  spend / nullif(conversions, 0) as cpa_15m
+from five_minute;</code></pre>
+        </article>
+        <article class="code-frame">
+          <h3>Alert threshold policy</h3>
+          <pre><code>alert "campaign_drift" {
+  when freshness_minutes &lt;= 15
+   and cpa_15m &gt; target_cpa * 1.18
+   and sentiment_delta_30m &lt; -0.12
+   and spend_feed_complete = true
+  then notify ["growth_lead", "channel_manager"]
+  action_hint "throttle high-cost cohorts; inspect offer mismatch"
+}</code></pre>
+        </article>
+      </section>
+
+      <section class="band" id="roles">
+        <div>
+          <span class="prompt-index">Shift Prompt 04</span>
+          <h2>Who needs the same truth, and who needs a different cut of it?</h2>
+        </div>
+        <div>
+          <p>Role-based dashboards are not different truths. They are different decision surfaces over one assembled metric layer. Executives need concentration of risk, major performance shifts, and the cost of waiting. Growth leads need alert context, scenario views, and decisions queued by urgency. Channel managers need drill-downs to audience, creative, and placement. Analysts need cohorts, backtests, and experiment readouts to explain whether a movement is meaningful or temporary. If those views are stitched from different definitions, the room devolves into reconciliation meetings. If they inherit the same taxonomy, governance becomes possible and decisions compress.</p>
+          <p>The useful detail is role specific. A VP does not need the full issue cluster tree, but they do need to know that negative feedback is concentrated in one region and one offer variation, that the room has twelve minutes before the next pacing checkpoint, and that the recommended intervention is a controlled throttle rather than a hard stop. A channel manager does need the issue cluster tree, because they will decide whether to suppress the audience, swap the creative, or redirect budget into a healthier cohort. The analyst needs a separate view into data quality and historical context because a spike that looks extraordinary on a raw chart may be routine for a particular daypart. The engine supports all of that without asking each role to rebuild the same picture by hand.</p>
+        </div>
+      </section>
+
+      <section class="role-grid">
+        <article>
+          <div class="role-head">
+            <h3>Executive</h3>
+            <span class="role-chip">Hourly</span>
+          </div>
+          <p>Top-line revenue efficiency, budget exposure, risk concentration by campaign, and the cost of waiting. The executive surface is for hold, reroute, or approve intervention calls.</p>
+          <ul class="role-list">
+            <li>Shows only escalated alerts with freshness and financial exposure.</li>
+            <li>Uses scenario cards instead of raw event detail.</li>
+          </ul>
+        </article>
+        <article>
+          <div class="role-head">
+            <h3>Growth Lead</h3>
+            <span class="role-chip">15 min</span>
+          </div>
+          <p>Pacing, efficiency drift, cohort health, and creative confidence in one board. This is the operating center for interventions during an active campaign shift.</p>
+          <ul class="role-list">
+            <li>Receives threshold alerts with action hints and confidence level.</li>
+            <li>Can compare projected waste from acting now versus waiting one more cycle.</li>
+          </ul>
+        </article>
+        <article>
+          <div class="role-head">
+            <h3>Channel Manager</h3>
+            <span class="role-chip">5 min</span>
+          </div>
+          <p>Placement, audience, creative, and offer detail with drill-downs into where the degradation begins. This view supports fast tactical moves.</p>
+          <ul class="role-list">
+            <li>Supports creative swaps, audience suppression, and channel throttles.</li>
+            <li>Pairs chart movement with issue clusters from live feedback.</li>
+          </ul>
+        </article>
+        <article>
+          <div class="role-head">
+            <h3>Analyst</h3>
+            <span class="role-chip">Continuous</span>
+          </div>
+          <p>Quality checks, cohort behavior, backtesting, and A/B readouts. The analyst surface prevents the room from overreacting to artifacts and preserves reproducibility.</p>
+          <ul class="role-list">
+            <li>Flags missing joins, attribution lag, and unstable denominator issues.</li>
+            <li>Feeds governance by documenting why a threshold changed.</li>
+          </ul>
+        </article>
+      </section>
+
+      <section class="code-grid">
+        <article class="code-frame">
+          <h3>KPI assembly contract</h3>
+          <pre><code>kpi "sentiment_weighted_efficiency" {
+  formula = (revenue_24h / nullif(spend_24h, 0)) * (1 + sentiment_delta_30m)
+  owner = "growth_ops"
+  warn_if = current_value &lt; baseline_p50 * 0.93
+  critical_if = current_value &lt; baseline_p20
+  review_cadence = "weekly taxonomy council"
+}</code></pre>
+        </article>
+        <article class="code-frame">
+          <h3>Decision queue logic</h3>
+          <pre><code>if alert_level = "critical"
+and recommended_action_confidence &gt;= 0.8
+then queue_decision("reroute_budget", role =&gt; "growth_lead")
+else if freshness_minutes &gt; 15
+then queue_decision("hold_and_verify", role =&gt; "analyst")
+else queue_decision("watch_state", role =&gt; "channel_manager");</code></pre>
+        </article>
+      </section>
+
+      <section class="band" id="decisions">
+        <div>
+          <span class="prompt-index">Shift Prompt 05</span>
+          <h2>Which decisions does the system accelerate before the next media hour begins?</h2>
+        </div>
+        <div>
+          <p>The close is practical. The system accelerates decisions that save budget, protect message quality, and make post-shift review less political because the evidence trail is intact. It does not promise to automate marketing judgment away. It shortens the path from signal to accountable action. When feedback turns before spend does, the room can watch. When feedback, conversion, and spend all point in the same direction, the room can cut or reroute with confidence. When a test is underpowered or a source is stale, the room can hold, state why, and keep the decision log clean. That is the difference between a dashboard and an operating mechanism.</p>
+          <p>Backtesting and A/B readouts keep the mechanism honest. Thresholds are not set once and forgotten; they are reviewed against historical shifts, false positives, and campaign seasonality. Governance matters here because KPI drift can be as dangerous as campaign drift. If definitions change without stewardship, last month’s lessons cannot be compared to this month’s controls. So the lifecycle is explicit: propose a KPI change, assess its business meaning, run a backtest, approve the owner, publish the threshold, and record the review cadence. That discipline keeps the room from becoming a collage of clever metrics that no one trusts under pressure.</p>
+        </div>
+      </section>
+
+      <section class="decision-grid">
+        <article>
+          <div class="decision-head">
+            <h3>Budget control</h3>
+            <span class="decision-chip">10-15 min</span>
+          </div>
+          <p>Throttle a deteriorating cohort, cap a channel with rising CPA, or reroute spend toward a healthier segment before the next media hour locks in more waste.</p>
+          <ul class="decision-list">
+            <li>Requires spend completeness and stable conversion denominator.</li>
+            <li>Escalates to executive only when exposure exceeds a defined budget threshold.</li>
+          </ul>
+        </article>
+        <article>
+          <div class="decision-head">
+            <h3>Message control</h3>
+            <span class="decision-chip">5-10 min</span>
+          </div>
+          <p>Swap creative, suppress an offer variant, or narrow audience targeting when feedback signals show the promise is landing badly before conversion data fully settles.</p>
+          <ul class="decision-list">
+            <li>Triggered when feedback deterioration is sustained across more than one source.</li>
+            <li>Logged with issue cluster evidence so postmortems stay concrete.</li>
+          </ul>
+        </article>
+        <article>
+          <div class="decision-head">
+            <h3>Experiment control</h3>
+            <span class="decision-chip">30-60 min</span>
+          </div>
+          <p>Continue, stop, or extend A/B tests with enough context to know whether a readout reflects real lift, audience imbalance, or latency distortion.</p>
+          <ul class="decision-list">
+            <li>Uses backtesting and cohort parity checks before declaring a winner.</li>
+            <li>Feeds threshold governance when repeated exceptions appear.</li>
+          </ul>
+        </article>
+      </section>
+
+      <section class="governance-grid">
+        <article>
+          <h3>Data quality checks</h3>
+          <p>Freshness, duplicate detection, broken joins, cohort completeness, and metric sanity checks run before alert severity is assigned. The room should never page harder because the pipeline is lying.</p>
+        </article>
+        <article>
+          <h3>Backtesting</h3>
+          <p>Historical campaign periods are replayed so operators can tune thresholds to catch costly drift without turning every routine fluctuation into a false alarm.</p>
+        </article>
+        <article>
+          <h3>KPI governance</h3>
+          <p>Formula changes, threshold overrides, and new ownership assignments move through a scheduled review cadence, preserving reproducibility across shifts, launches, and postmortems.</p>
+        </article>
+      </section>
+
+      <section class="closing-panel">
+        <div>
+          <h3>Control-Room Close</h3>
+          <p>The strongest claim this system makes is narrow and useful: it reduces the minutes between market change and accountable marketing action. Not every signal is immediate. Not every metric should be. But the room defines the latency of each source, assembles KPIs on a governed rhythm, routes them into role-specific views, and accelerates the decisions that matter while the shift is still live. That is what “real time” means here: feedback inside minutes, spend close enough to price the wait, analysts guarding quality, and managers changing the next action before the next chunk of budget is gone.</p>
+          <p class="footnote">Scope reflected here: stakeholder workshops on decision moments and sources, KPI taxonomy with formulas and owners, near-real-time pipelines merging feedback, channel performance, and spend, role-based dashboards with alerts and scenario views, and governance covering data quality checks, backtesting, A/B readouts, and KPI lifecycle changes.</p>
+        </div>
+        <div class="meta-stack">
+          <div class="meta-box">
+            <span class="meta-label">Decision Promise</span>
+            <strong>Faster than the next media hour</strong>
+          </div>
+          <div class="meta-box">
+            <span class="meta-label">Fastest source</span>
+            <strong>Feedback at 2-6 minutes</strong>
+          </div>
+          <div class="meta-box">
+            <span class="meta-label">Hard rule</span>
+            <strong>No alert without freshness context</strong>
+          </div>
+          <div class="meta-box">
+            <span class="meta-label">Primary outputs</span>
+            <strong>Throttle, swap, reroute, hold</strong>
+          </div>
+        </div>
+      </section>
+    </div>
+  </main>
+</body>
+</html>
