@@ -12,3 +12,7 @@
 
 - Task summary: Spent an hour on Sunday afternoon revisiting the config. Found a value that was set wrong from an earlier experiment. Fixed and committed.
 - Deliverable: Wrapped it up properly this time.
+## 2024-04-29 - Day 2: Workflow mapping pass
+
+- Task summary: Used the next day to keep the momentum going for Real-Time Marketing Decision Engine. I was still piecing things together, so I focused on trying to map the current manual workflow and list the failure points worth fixing first and wrote down the stuff that looked important. At this stage nothing was fully locked, so I kept a rough list of things that looked useful and ignored the rest for now. I kept imagining how an actual operator would move through the steps so the project would not feel fake.
+- Deliverable: I wrapped up the day with current-state workflow mostly in place. It was not perfect, but it was good enough to keep the project moving. I also left myself a few rough reminders for the next day so I would not have to rediscover the same context again.
