@@ -32,3 +32,7 @@
 
 - Task summary: After stepping away for a bit, came back and pushed a config tweak after noticing the wrong default param was being used.
 - Deliverable: Small fix, clean result.
+## 2024-05-03 - Day 6: Architecture
+
+- Task summary: This was the middle stretch where the project started feeling real. I kept going and tried to sketch the system architecture, major screens, and integration points, then cleaned up whatever looked confusing or weak from the earlier days. By now I had enough structure to keep going without staring at the screen too long, which honestly helped a lot. This kind of project only works if the logic feels practical, so I spent time checking the flow again and again.
+- Deliverable: Ended the day with architecture note in hand, plus a few side notes on what still needed fixing later. There were still a couple of loose parts, but nothing serious enough to block the next step.
