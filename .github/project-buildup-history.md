@@ -64,3 +64,7 @@
 
 - Task summary: Circled back: the test I wrote this morning had a hardcoded path, swapped it for a relative one.
 - Deliverable: Wrapped it up properly this time.
+## 2024-05-12 - Day 11: Documentation check
+
+- Task summary: Half-day Saturday session. Decided to finish the README section I skipped on Friday — cleaner now.
+- Deliverable: Nothing dramatic — just keeping things tidy.
