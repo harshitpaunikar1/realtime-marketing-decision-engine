@@ -38,7 +38,7 @@
 - Deliverable: Ended the day with architecture note in hand, plus a few side notes on what still needed fixing later. There were still a couple of loose parts, but nothing serious enough to block the next step.
 ## 2024-05-05 - Day 6: Architecture
 
-- Task summary: Weekend fix — the visualizations had overlapping labels in narrow viewports. Adjusted the figure size and padding.
+- Task summary: Weekend fix - the visualizations had overlapping labels in narrow viewports. Adjusted the figure size and padding.
 - Deliverable: Solid now, moving on.
 ## 2024-05-06 - Day 7: UI scaffold
 
@@ -66,8 +66,8 @@
 - Deliverable: Wrapped it up properly this time.
 ## 2024-05-12 - Day 11: Documentation check
 
-- Task summary: Half-day Saturday session. Decided to finish the README section I skipped on Friday — cleaner now.
-- Deliverable: Nothing dramatic — just keeping things tidy.
+- Task summary: Half-day Saturday session. Decided to finish the README section I skipped on Friday - cleaner now.
+- Deliverable: Nothing dramatic - just keeping things tidy.
 ## 2024-05-13 - Day 12: Polish wrap
 
 - Task summary: Used the last day on Real-Time Marketing Decision Engine to slow down and finish the loose ends. I mainly had to refine naming, visuals, and explanations so the project feels coherent and make sure the project told a clean story from start to finish. Toward the end I mostly kept trimming weird bits, fixing wording, and tying the loose parts together. This kind of project only works if the logic feels practical, so I spent time checking the flow again and again.
